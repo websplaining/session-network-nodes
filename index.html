@@ -10,9 +10,19 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
       --bg:#0a0a0a; --surface:#0f0f0f; --border:#1f3a1f;
-      --text:#c0d0c0; --muted:#5a7a5a; --accent:#00ffa3;
-      --code-bg:#0d120d; --btn-bg:#151f15; --btn-hover:#1f2f1f;
+      --text:#c0d0c0; --muted:#5a7a5a;
+      --accent:#00ffa3; --code-bg:#0d120d;
+      --btn-bg:#151f15; --btn-hover:#1f2f1f;
       --glow:0 0 8px #00ffa380; --danger:#ff5555;
+      --bar-bg:#0d1a0d; --chip:rgba(255,255,255,.07); --tile-l:16%;
+    }
+    .light {
+      --bg:#f5faf5; --surface:#fff; --border:#d0e0d0;
+      --text:#1a2a1a; --muted:#5a7a5a;
+      --accent:#00a86b; --code-bg:#eef5ee;
+      --btn-bg:#dce8dc; --btn-hover:#ccdccc;
+      --glow:none; --danger:#c0392b;
+      --bar-bg:#e4efe4; --chip:rgba(0,0,0,.06); --tile-l:82%;
     }
     body {
       font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -70,7 +80,7 @@
     #hostTable th:last-child, #hostTable td:last-child { width:28%; }
     .bar { height:5px; background:var(--accent); border-radius:3px; box-shadow:0 0 4px var(--accent); min-width:2px; }
     .barcell { display:flex; align-items:center; gap:8px; }
-    .barwrap { flex:1; background:#0d1a0d; border-radius:3px; min-width:40px; }
+    .barwrap { flex:1; background:var(--bar-bg); border-radius:3px; min-width:40px; }
     .count { color:var(--accent); font-variant-numeric:tabular-nums; text-align:right; font-weight:600; }
 
     .tablewrap { max-height:520px; overflow:auto; border:1px solid var(--border); border-radius:6px; }
@@ -82,7 +92,7 @@
     a:hover { text-decoration:underline; }
     .muted { color:var(--muted); }
     .flag { width:22px; height:auto; vertical-align:-3px; border-radius:2px; margin-right:5px; box-shadow:0 0 3px rgba(0,255,163,.3); }
-    .hlogo { height:20px; width:auto; vertical-align:-5px; margin-right:6px; background:rgba(255,255,255,.07); border-radius:3px; padding:2px 4px; }
+    .hlogo { height:20px; width:auto; vertical-align:-5px; margin-right:6px; background:var(--chip); border-radius:3px; padding:2px 4px; }
     .tile { display:inline-flex; align-items:center; justify-content:center; width:20px; height:20px; border-radius:4px; color:var(--accent); font-size:.7rem; font-weight:700; vertical-align:-5px; margin-right:6px; border:1px solid var(--border); }
     .copyable { cursor:pointer; border-bottom:1px dashed var(--border); transition:color .15s, border-color .15s; }
     .copyable:hover { color:var(--accent); border-color:var(--accent); }
@@ -95,6 +105,13 @@
     .search:focus { border-color:var(--accent); }
     .meta { font-size:.75rem; color:var(--muted); }
     .nodata { text-align:center; padding:2rem; color:var(--muted); }
+
+    .theme-toggle { position:fixed; top:14px; right:14px; z-index:1000; display:flex; align-items:center; cursor:pointer; user-select:none; }
+    .theme-track { width:50px; height:28px; border-radius:14px; background:#0a1a0a; position:relative; transition:background .3s; border:1px solid var(--border); }
+    .theme-thumb { position:absolute; top:3px; left:3px; width:20px; height:20px; border-radius:50%; background:var(--accent); transition:transform .3s; display:flex; align-items:center; justify-content:center; overflow:hidden; }
+    .theme-thumb svg { width:12px; height:12px; fill:#0d1a0d; }
+    .theme-toggle.light .theme-track { background:#1a2a1a; border-color:var(--accent); }
+    .theme-toggle.light .theme-thumb { transform:translateX(22px); }
 
     @media (max-width:560px) {
       .wrap { padding:1rem .7rem 2.5rem; }
@@ -118,6 +135,9 @@
   </style>
 </head>
 <body>
+<div class="theme-toggle" id="themeToggle" onclick="toggleTheme()" role="switch" aria-checked="false">
+  <span class="theme-track"><span class="theme-thumb"><svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span></span>
+</div>
 <div class="scanline"></div>
 <div class="wrap">
   <header>
@@ -182,6 +202,27 @@
 let DATA = { countries: [], hosts: [], nodes: [] };
 let sortKey = 'country', sortDir = 1, query = '';
 
+const S_ICON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><g stroke="#0d1a0d" stroke-width="2" stroke-linecap="round"><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>';
+const M_ICON = '<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+
+(function() {
+  const d = document.documentElement, t = document.getElementById('themeToggle');
+  const thumb = t.querySelector('.theme-thumb'), isLight = localStorage.theme === 'light';
+  if (isLight) { d.classList.add('light'); t.classList.add('light'); }
+  thumb.innerHTML = isLight ? S_ICON : M_ICON;
+  t.setAttribute('aria-checked', isLight);
+})();
+
+function toggleTheme() {
+  const d = document.documentElement, t = document.getElementById('themeToggle');
+  const thumb = t.querySelector('.theme-thumb');
+  d.classList.toggle('light'); t.classList.toggle('light');
+  const isLight = d.classList.contains('light');
+  localStorage.theme = isLight ? 'light' : 'dark';
+  thumb.innerHTML = isLight ? S_ICON : M_ICON;
+  t.setAttribute('aria-checked', isLight);
+}
+
 function flag(cc) {
   if (!cc || cc.length !== 2) return '<span class="muted">—</span>';
   const c = cc.toLowerCase();
@@ -233,7 +274,7 @@ function hostIcon(host) {
   if (key) return `<img class="hlogo" src="logos/${key}.png" alt="" title="${esc(host)}" loading="lazy" onerror="this.remove()">`;
   let hue = 0;
   for (let i = 0; i < host.length; i++) hue = (hue * 31 + host.charCodeAt(i)) % 360;
-  return `<span class="tile" style="background:hsl(${hue},45%,16%)" title="${esc(host)}">${esc((host[0] || '?').toUpperCase())}</span>`;
+  return `<span class="tile" style="background:hsl(${hue},45%,var(--tile-l))" title="${esc(host)}">${esc((host[0] || '?').toUpperCase())}</span>`;
 }
 function esc(s) { return String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
 function ago(ts) {
