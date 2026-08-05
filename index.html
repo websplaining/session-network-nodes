@@ -5,6 +5,18 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Session Network Nodes</title>
   <meta name="robots" content="noindex, nofollow">
+  <meta property="og:title" content="Session Network Nodes">
+  <meta property="og:description" content="Live distribution of the Session service-node network: VPS hosts, countries, operator wallets, and per-node details.">
+  <meta property="og:url" content="https://sessionaiagent.com/secret/">
+  <meta property="og:type" content="website">
+  <meta property="og:image" content="https://sessionaiagent.com/secret/og-image.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:site_name" content="Session Network Nodes">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Session Network Nodes">
+  <meta name="twitter:description" content="Live distribution of the Session service-node network: VPS hosts, countries, operator wallets, and per-node details.">
+  <meta name="twitter:image" content="https://sessionaiagent.com/secret/og-image.png">
   <link rel="icon" type="image/png" href="/favicon-64.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -36,6 +48,9 @@
     header { text-align:center; margin-bottom:1.8rem; }
     .brand { display:inline-flex; align-items:center; gap:10px; margin-bottom:.4rem; }
     .brand img { width:40px; height:40px; border-radius:50%; filter:drop-shadow(0 0 6px var(--accent)); }
+    .brandlogo { display:inline-flex; }
+    .brandlogo img { transition:filter .2s; }
+    .brandlogo:hover img { filter:drop-shadow(0 0 10px var(--accent)); }
     .brand h1 { font-size:1.4rem; font-weight:700; letter-spacing:1px; color:var(--accent); text-shadow:var(--glow); }
     .sub { color:var(--muted); font-size:.85rem; }
     .live { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--accent); box-shadow:0 0 6px var(--accent); animation:pulse 2s infinite; vertical-align:middle; margin-right:5px; }
@@ -142,7 +157,7 @@
 <div class="wrap">
   <header>
     <div class="brand">
-      <img src="/session-logo-opt.png" alt="Session">
+      <a href="https://sessionaiagent.com" class="brandlogo" title="Session AI Agent - back to main site" aria-label="Session AI Agent home"><img src="/session-logo-opt.png" alt="Session"></a>
       <h1>[ Session Network Nodes ]</h1>
     </div>
     <div class="sub"><span class="live"></span>Live distribution of the Session service-node network &nbsp;·&nbsp; <span id="updated">loading…</span></div>
@@ -236,6 +251,18 @@ const HOST_LOGOS = {
   'DigitalOcean': 'digitalocean', 'Interserver, Inc': 'interserver',
   'netcup': 'netcup', 'Oracle Cloud': 'oracle', 'Leaseweb': 'leaseweb',
   'IONOS': 'ionos', 'Akamai': 'akamai', 'Vultr': 'vultr', 'Hostinger': 'hostinger',
+  'dataforest GmbH': 'dataforest', 'Datalix': 'datalix', 'Mvps LTD': 'mvps',
+  'HostPapa': 'hostpapa', 'WitherHosting': 'witherhosting', 'RackNerd LLC': 'racknerd',
+  'Zynoo': 'zynoo', 'Upcloud FI Hel1': 'upcloud', 'UpCloud Ltd': 'upcloud',
+  'HIVELOCITY, Inc.': 'hivelocity', 'Softshell Hosting LTD': 'softshell',
+  'WebNX, Inc': 'webnx', 'WebNX, Inc.': 'webnx', 'LINVEO, LLC': 'linveo', 'linveo': 'linveo',
+  'Shock Hosting LLC': 'shockhosting', 'PureVoltage Hosting Inc': 'purevoltage',
+  '1GSERVERS, LLC': '1gservers', 'Alwyzon': 'alwyzon', 'M247': 'm247',
+  'TransIP BV': 'transip', 'Clouvider Limited': 'clouvider', 'HostHatch': 'hosthatch',
+  'Hostodo': 'hostodo', 'Light Node Limited': 'lightnode', 'Lightnode-AE': 'lightnode',
+  'LightNode-TH': 'lightnode', 'Kaopu Cloud': 'kaopu', 'KaopuCloud-TH': 'kaopu',
+  'KaopuCloud-VN': 'kaopu', 'VPS ACE': 'vpsace', 'BusinessOnline AG': 'businessonline',
+  'Hostnet': 'hostnet', 'tzulo, inc': 'tzulo', 'tzulo, inc.': 'tzulo', 'AT&T': 'att',
 };
 
 function copyText(el) {
@@ -269,6 +296,28 @@ function applyNodeFilter(term) {
   document.getElementById('nodes').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function opLabel(n) {
+  if (n.ens) {
+    return n.ens.length <= 16 ? n.ens : `${n.ens.slice(0, 7)}…${n.ens.slice(-8)}`;
+  }
+  return `${n.operator.slice(0, 6)}…${n.operator.slice(-4)}`;
+}
+
+const HOST_LINKS = {
+  'DigitalOcean': 'https://m.do.co/c/89b2c5ca8ec4',
+  'Linode': 'https://www.linode.com/lp/refer/?r=e79e5bc41705426b5ccfc5d94059e6569b660f73',
+  'Akamai': 'https://www.linode.com/lp/refer/?r=e79e5bc41705426b5ccfc5d94059e6569b660f73',
+  'dataforest GmbH': 'https://avoro.eu/cp/aff.php?aff=617',
+  'Datalix': 'https://datalix.eu/a/affiliatelink',
+  'Contabo': 'https://websplaining.com/contabo',
+  'Vultr': 'https://www.vultr.com/?ref=9648752-9J',
+};
+
+function linkHost(host, inner) {
+  const url = HOST_LINKS[host];
+  return url ? `<a href="${esc(url)}" target="_blank" rel="noopener">${inner}</a>` : inner;
+}
+
 function hostIcon(host) {
   const key = HOST_LOGOS[host];
   if (key) return `<img class="hlogo" src="logos/${key}.png" alt="" title="${esc(host)}" loading="lazy" onerror="this.remove()">`;
@@ -294,7 +343,7 @@ function renderSummary() {
       <div class="barwrap" style="margin-top:4px"><div class="bar" style="width:${(c.count/maxC*100).toFixed(1)}%"></div></div></td>
       <td class="count"><span class="countlink" title="Filter nodes: ${esc(c.country)}" data-filter="${esc(c.country)}">${c.count}</span></td></tr>`).join('') || '<tr><td colspan="2" class="nodata">no data</td></tr>';
   document.querySelector('#hostTable tbody').innerHTML = DATA.hosts.map(h => `
-    <tr><td>${hostIcon(h.host)}${esc(h.host)}
+    <tr><td>${linkHost(h.host, hostIcon(h.host) + esc(h.host))}
       <div class="barwrap" style="margin-top:4px"><div class="bar" style="width:${(h.count/maxH*100).toFixed(1)}%"></div></div></td>
       <td class="count"><span class="countlink" title="Filter nodes: ${esc(h.host)}" data-filter="${esc(h.host)}">${h.count}</span></td></tr>`).join('') || '<tr><td colspan="2" class="nodata">no data</td></tr>';
 }
@@ -303,12 +352,13 @@ function filteredNodes() {
   let rows = DATA.nodes.slice();
   if (query) {
     const q = query.toLowerCase();
-    rows = rows.filter(n => [n.ip, n.country, n.host, n.city, n.region, n.operator, n.pkfull, n.pk]
+    rows = rows.filter(n => [n.ip, n.country, n.host, n.city, n.region, n.operator, n.ens, n.pkfull, n.pk]
       .some(v => String(v ?? '').toLowerCase().includes(q)));
   }
   rows.sort((a, b) => {
     let x = a[sortKey], y = b[sortKey];
     if (sortKey === 'country') { x = (a.country); y = (b.country); }
+    if (sortKey === 'operator') { x = opLabel(a); y = opLabel(b); }
     if (typeof x === 'string') { x = x.toLowerCase(); y = String(y ?? '').toLowerCase(); return (x < y ? -1 : x > y ? 1 : 0) * sortDir; }
     x = x ?? -Infinity; y = y ?? -Infinity;
     return (x - y) * sortDir;
@@ -325,8 +375,8 @@ function renderNodes() {
       <td>${flag(n.cc)} ${esc(n.country)}</td>
       <td class="mono">${n.ip ? `<span class="copyable" title="${esc(n.ip)} (click to copy)" data-copy="${esc(n.ip)}" onclick="copyText(this)">${esc(n.ip)}</span>` : '<span class="muted">—</span>'}</td>
       <td class="muted">${esc([n.region, n.city].filter(Boolean).join(', ')) || '—'}</td>
-      <td>${esc(n.host)}</td>
-      <td>${n.operator ? `<span class="mono muted copyable" title="${esc(n.operator)} (click to copy)" data-copy="${esc(n.operator)}" onclick="copyText(this)">${esc(n.operator.slice(0,6))}…${esc(n.operator.slice(-4))}</span>` : '<span class="muted">—</span>'}</td>
+      <td>${linkHost(n.host, esc(n.host))}</td>
+      <td>${n.operator ? `<span class="mono muted copyable" title="${esc(n.ens ? n.ens + ' · ' + n.operator : n.operator)} (click to copy)" data-copy="${esc(n.operator)}" onclick="copyText(this)">${esc(opLabel(n))}</span>` : '<span class="muted">—</span>'}</td>
       <td class="count">${n.fee == null ? '<span class="muted">—</span>' : n.fee}</td>
       <td class="mono muted">${esc(n.version) || '—'}</td>
       <td class="muted">${ago(n.uptime)}</td>
