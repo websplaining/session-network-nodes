@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Session Network Nodes</title>
-  <meta name="robots" content="noindex, nofollow">
+  <title>Session Network Nodes - Live Distribution, VPS Hosts &amp; Operators</title>
+  <meta name="robots" content="index, follow">
+  <meta name="description" content="Live distribution of the Session service-node network: VPS hosts, countries, operator wallets, and per-node details.">
+  <link rel="canonical" href="https://sessionaiagent.com/secret/">
   <meta property="og:title" content="Session Network Nodes">
   <meta property="og:description" content="Live distribution of the Session service-node network: VPS hosts, countries, operator wallets, and per-node details.">
   <meta property="og:url" content="https://sessionaiagent.com/secret/">
@@ -17,6 +19,8 @@
   <meta name="twitter:title" content="Session Network Nodes">
   <meta name="twitter:description" content="Live distribution of the Session service-node network: VPS hosts, countries, operator wallets, and per-node details.">
   <meta name="twitter:image" content="https://sessionaiagent.com/secret/og-image.png">
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebPage","name":"Session Network Nodes","description":"Live distribution of the Session service-node network: VPS hosts, countries, operator wallets, and per-node details.","url":"https://sessionaiagent.com/secret/","inLanguage":"en"}</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"Dataset","name":"Session Service-Node Network","description":"Live distribution of Session service nodes: countries, VPS hosts, operator wallets, per-node IPs and metadata.","url":"https://sessionaiagent.com/secret/","distribution":{"@type":"DataDownload","contentUrl":"https://sessionaiagent.com/secret/nodes.json","encodingFormat":"application/json"}}</script>
   <link rel="icon" type="image/png" href="/favicon-64.png">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -60,6 +64,9 @@
     .card { background:var(--surface); border:1px solid var(--border); border-radius:6px; padding:.9rem 1rem; text-align:center; }
     .card .n { font-size:1.7rem; font-weight:700; color:var(--accent); text-shadow:var(--glow); font-variant-numeric:tabular-nums; }
     .card .l { font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-top:.2rem; }
+    .videocard { padding:.5rem .5rem 0; overflow:hidden; }
+    .videocard .video-wrap { position:relative; aspect-ratio:16/9; }
+    .videocard .video-wrap iframe { position:absolute; inset:0; width:100%; height:100%; border:0; }
     .card .n.loading {
       background:linear-gradient(90deg, rgba(0,255,163,.12) 0%, var(--accent) 50%, rgba(0,255,163,.12) 100%);
       background-size:200% 100%;
@@ -133,6 +140,7 @@
       .cards { grid-template-columns:repeat(2,1fr); gap:.6rem; }
       .card { padding:.7rem .5rem; }
       .card .n { font-size:1.35rem; }
+      .videocard { grid-column:span 2; padding:.5rem .5rem 0; }
       .brand h1 { font-size:1.15rem; }
       .brand img { width:32px; height:32px; }
       .sub { font-size:.78rem; }
@@ -168,19 +176,28 @@
     <div class="card"><div class="n loading" id="c-active">···</div><div class="l">Active</div></div>
     <div class="card"><div class="n loading" id="c-countries">···</div><div class="l">Countries</div></div>
     <div class="card"><div class="n loading" id="c-hosts">···</div><div class="l">VPS Hosts</div></div>
+    <div class="card videocard">
+      <div class="l">▶ Video</div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube-nocookie.com/embed/cjluIwzUS74"
+                title="Session AI Agent video"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowfullscreen loading="lazy"></iframe>
+      </div>
+    </div>
   </div>
 
   <h2>Summary</h2>
   <div class="grid2">
     <div>
       <table id="countryTable">
-        <thead><tr><th>Country</th><th style="text-align:right">Nodes</th></tr></thead>
+        <thead><tr><th>Country</th><th class="count-head" style="text-align:right">Nodes</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
     <div>
       <table id="hostTable">
-        <thead><tr><th>VPS Host</th><th style="text-align:right">Nodes</th></tr></thead>
+        <thead><tr><th>VPS Host</th><th class="count-head" style="text-align:right">Nodes</th></tr></thead>
         <tbody></tbody>
       </table>
     </div>
@@ -216,6 +233,7 @@
 <script>
 let DATA = { countries: [], hosts: [], nodes: [] };
 let sortKey = 'country', sortDir = 1, query = '';
+let countryDir = -1, hostDir = -1;
 
 const S_ICON = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><g stroke="#0d1a0d" stroke-width="2" stroke-linecap="round"><path d="M12 1v3M12 20v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M1 12h3M20 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></g></svg>';
 const M_ICON = '<svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
@@ -336,13 +354,17 @@ function ago(ts) {
 }
 
 function renderSummary() {
-  const maxC = Math.max(1, ...DATA.countries.map(c => c.count));
-  const maxH = Math.max(1, ...DATA.hosts.map(h => h.count));
-  document.querySelector('#countryTable tbody').innerHTML = DATA.countries.map(c => `
+  const countries = [...DATA.countries].sort((a, b) => (a.count - b.count) * countryDir || a.country.localeCompare(b.country));
+  const hosts = [...DATA.hosts].sort((a, b) => (a.count - b.count) * hostDir || a.host.localeCompare(b.host));
+  const maxC = Math.max(1, ...countries.map(c => c.count));
+  const maxH = Math.max(1, ...hosts.map(h => h.count));
+  document.querySelector('#countryTable .count-head').innerHTML = 'Nodes <span class="arrow">' + (countryDir === 1 ? '▲' : '▼') + '</span>';
+  document.querySelector('#hostTable .count-head').innerHTML = 'Nodes <span class="arrow">' + (hostDir === 1 ? '▲' : '▼') + '</span>';
+  document.querySelector('#countryTable tbody').innerHTML = countries.map(c => `
     <tr><td>${flag(c.cc)} ${esc(c.country)}
       <div class="barwrap" style="margin-top:4px"><div class="bar" style="width:${(c.count/maxC*100).toFixed(1)}%"></div></div></td>
       <td class="count"><span class="countlink" title="Filter nodes: ${esc(c.country)}" data-filter="${esc(c.country)}">${c.count}</span></td></tr>`).join('') || '<tr><td colspan="2" class="nodata">no data</td></tr>';
-  document.querySelector('#hostTable tbody').innerHTML = DATA.hosts.map(h => `
+  document.querySelector('#hostTable tbody').innerHTML = hosts.map(h => `
     <tr><td>${linkHost(h.host, hostIcon(h.host) + esc(h.host))}
       <div class="barwrap" style="margin-top:4px"><div class="bar" style="width:${(h.count/maxH*100).toFixed(1)}%"></div></div></td>
       <td class="count"><span class="countlink" title="Filter nodes: ${esc(h.host)}" data-filter="${esc(h.host)}">${h.count}</span></td></tr>`).join('') || '<tr><td colspan="2" class="nodata">no data</td></tr>';
@@ -433,6 +455,8 @@ document.getElementById('search').addEventListener('input', e => { query = e.tar
     if (el) applyNodeFilter(el.dataset.filter);
   });
 });
+document.querySelector('#countryTable .count-head').addEventListener('click', () => { countryDir *= -1; renderSummary(); });
+document.querySelector('#hostTable .count-head').addEventListener('click', () => { hostDir *= -1; renderSummary(); });
 
 load();
 setInterval(load, 120000);
