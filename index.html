@@ -314,7 +314,12 @@ function applyNodeFilter(term) {
   document.getElementById('nodes').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+const OPERATOR_LABELS = {
+  '0xD9820b5b1e98C12F7dadA399c4Cc2caDAABc6AE6': 'STF',
+};
+
 function opLabel(n) {
+  if (OPERATOR_LABELS[n.operator]) return OPERATOR_LABELS[n.operator];
   if (n.ens) {
     return n.ens.length <= 16 ? n.ens : `${n.ens.slice(0, 7)}…${n.ens.slice(-8)}`;
   }

@@ -1,4 +1,4 @@
-# Session Network Nodes
+# [Session Network Nodes](https://sessionaiagent.com/secret/)
 
 Live dashboard of the **Session service-node network**: where nodes run, on which VPS providers, and who operates them.
 

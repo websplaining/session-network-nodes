@@ -22,8 +22,10 @@ GEO_FIELDS = "status,query,country,countryCode,regionName,city,isp,org,as"
 WORK = "/root/session-nodes"
 CACHE = os.path.join(WORK, "cache.json")      # pubkey -> node fields
 GEOCACHE = os.path.join(WORK, "geo.json")     # ip -> geo fields
+ENSCACHE = os.path.join(WORK, "ens.json")     # wallet address -> ens name
 OUT_DIR = "/var/www/session-agent/html/secret"
 OUT_JSON = os.path.join(OUT_DIR, "nodes.json")
+ENS_URL = "https://api.ensideas.com/ens/resolve/{}"
 
 NODE_TTL = 6 * 3600       # refetch a node's detail if older than 6h
 CONCURRENCY = 8
@@ -165,6 +167,23 @@ def enrich_geo(ips, geo):
     return geo
 
 
+def enrich_ens(wallets, ens):
+    """Fill ens{} (wallet address -> ENS name) for wallets not already cached."""
+    todo = [w for w in wallets if w and w not in ens]
+    for w in todo:
+        try:
+            req = urllib.request.Request(ENS_URL.format(w), headers=UA)
+            with urllib.request.urlopen(req, timeout=15) as r:
+                d = json.loads(r.read().decode("utf-8", "replace"))
+            name = (d.get("name") or "").strip() if isinstance(d, dict) else ""
+            ens[w] = name
+        except Exception as e:
+            print(f"  ens lookup error {w}: {e}", file=sys.stderr)
+            ens[w] = ""
+        time.sleep(0.3)
+    return ens
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--limit", type=int, default=0, help="process only first N nodes (testing)")
@@ -174,6 +193,7 @@ def main():
     os.makedirs(OUT_DIR, exist_ok=True)
     cache = load(CACHE, {})
     geo = load(GEOCACHE, {})
+    ens = load(ENSCACHE, {})
 
     print("Fetching node list...")
     pubkeys = get_pubkeys()
@@ -206,8 +226,15 @@ def main():
     print(f"  {len(ips)} unique IPs, {len(new_ips)} need geo lookup")
     geo = enrich_geo(ips, geo)
 
+    # ENS-enrich unique operator wallets
+    wallets = sorted({f.get("operator") for f in cache.values() if f.get("operator")})
+    new_w = [w for w in wallets if w not in ens]
+    print(f"  {len(wallets)} unique wallets, {len(new_w)} need ENS lookup")
+    ens = enrich_ens(wallets, ens)
+
     save(CACHE, cache)
     save(GEOCACHE, geo)
+    save(ENSCACHE, ens)
 
     # Build detail rows (only for nodes in the current list)
     detail = []
@@ -227,6 +254,7 @@ def main():
             "city": g.get("city", ""),
             "host": g.get("host", "Unknown"),
             "operator": f.get("operator", ""),
+            "ens": ens.get(f.get("operator", ""), ""),
             "active": f.get("active", False),
             "fee": f.get("fee"),
             "version": f.get("version", ""),
