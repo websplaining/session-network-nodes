@@ -35,6 +35,7 @@ UA = {"User-Agent": "session-nodes-dashboard/1.0"}
 # VPS host normalisation (matched case-insensitively against org/isp/as)
 VENDORS = [
     ("ovh", "OVH"), ("hetzner", "Hetzner"), ("contabo", "Contabo"),
+    ("nodehub", "NodeHub"), ("private customer", "NodeHub"),
     ("digitalocean", "DigitalOcean"), ("amazon", "AWS"), ("aws", "AWS"),
     ("google", "Google Cloud"), ("netcup", "netcup"), ("mevspace", "MEVSPACE"),
     ("vultr", "Vultr"), ("choopa", "Vultr"), ("linode", "Linode"),
