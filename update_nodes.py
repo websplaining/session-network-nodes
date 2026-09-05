@@ -36,6 +36,9 @@ UA = {"User-Agent": "session-nodes-dashboard/1.0"}
 VENDORS = [
     ("ovh", "OVH"), ("hetzner", "Hetzner"), ("contabo", "Contabo"),
     ("nodehub", "NodeHub"), ("private customer", "NodeHub"),
+    ("upcloud", "UpCloud"), ("light node", "LightNode"), ("lightnode", "LightNode"),
+    ("kaopu", "Kaopu Cloud"), ("365 group", "365 Group"),
+    ("webnx", "WebNX"), ("tzulo", "tzulo"),
     ("digitalocean", "DigitalOcean"), ("amazon", "AWS"), ("aws", "AWS"),
     ("google", "Google Cloud"), ("netcup", "netcup"), ("mevspace", "MEVSPACE"),
     ("vultr", "Vultr"), ("choopa", "Vultr"), ("linode", "Linode"),
