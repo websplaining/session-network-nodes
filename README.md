@@ -1,10 +1,10 @@
-# <img src="session-logo-mirrored.png" width="24"> [Session Network Nodes](https://sessionaiagent.com/secret/)
+# <img src="session-logo-mirrored-inverse.png" width="24"> [Session Network Nodes](https://sessionaiagent.com/secret/)
 
 Live dashboard of the **Session node network**: where nodes run, on which VPS providers, and who operates them.
 
 ![Session Network Nodes preview](screenshot.png)
 
-<img src="session-logo-inverse.png" width="20"> [Session AI Agent](https://sessionaiagent.com) - run your own AI agent on Session Messenger  
+<img src="session-logo-mirrored.png" width="20"> [Session AI Agent](https://sessionaiagent.com) - run your own AI agent on Session Messenger  
 <img src="youtube-logo.png" width="20"> [How to Run a Session Node](https://youtu.be/cjluIwzUS74) - video walkthrough
 
 ## Features
