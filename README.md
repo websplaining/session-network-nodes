@@ -1,6 +1,6 @@
 # [Session Network Nodes](https://sessionaiagent.com/secret/)
 
-Live dashboard of the **Session service-node network**: where nodes run, on which VPS providers, and who operates them.
+Live dashboard of the **Session node network**: where nodes run, on which VPS providers, and who operates them.
 
 ![Session Network Nodes preview](screenshot.png)
 
@@ -12,6 +12,8 @@ Live dashboard of the **Session service-node network**: where nodes run, on whic
 - **Search** - filter nodes by IP, country, host, city, region, operator wallet, or public key
 - **Sortable columns** - click any column header to sort
 - **Click-to-copy** - click an IP or truncated operator wallet to copy the full value
+- **Operator count** - unique operator wallets shown live in the header, alongside node / active / country / host totals
+- **Dark / light theme** - toggle in the top-right, remembered across visits
 - **Live data** - refreshes hourly server-side, auto-reloads in the browser every 2 minutes
 - **Self-hosted assets** - all country flags and VPS host logos are served first-party, zero third-party requests
 
